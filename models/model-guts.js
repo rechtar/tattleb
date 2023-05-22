@@ -3,7 +3,7 @@ module.exports = ({
   name = "name",
   tableName = "table-name",
   selectableProps = [],
-  timeout = 1000,
+  timeout = 3000,
 }) => {
   const create = (props) => {
     delete props.id;

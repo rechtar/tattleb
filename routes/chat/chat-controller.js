@@ -1,3 +1,4 @@
+const fetch = require("node-fetch");
 const ChatService = require("./chat-service");
 
 const getChats = async (req, res) => {
@@ -6,6 +7,8 @@ const getChats = async (req, res) => {
 
   return res.status(200).send({ ok: true, message: "succeed", data: threads });
 };
+
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const postChat = async (req, res) => {
   const userId = req.decodedUser.userId || null;
@@ -26,10 +29,45 @@ const getMessages = async (req, res) => {
 const postMessage = async (req, res) => {
   const userId = req.decodedUser.userId || null;
   const chatId = req.params.chatId || null;
-  const content = req.body.content;
-  const messages = await ChatService.createMessage(content, chatId, userId);
+  const { content } = req.body.content;
+  const contentWithRole = {
+    content,
+    role: "user",
+  };
+  const messages = await ChatService.createMessage(
+    contentWithRole,
+    chatId,
+    userId
+  );
 
-  return res.status(200).send({ ok: true, message: "succeed", data: messages });
+  const previousMessages = (await ChatService.findMessagesByChatId(chatId)).map(
+    (m) => m.content
+  );
+  // await sleep(5000);
+  // console.info(previousMessages.concat(contentWithRole));
+
+  const aiResponse = await fetch("http://tattle.kagome.io/api/ai_respond", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      messages: previousMessages.concat(contentWithRole),
+    }),
+  });
+  const jsonified = await aiResponse.json();
+  // console.log(jsonified);
+  const aiMessage = jsonified.result.choices[0].message;
+  const messagesWithResponse = await ChatService.createMessage(
+    aiMessage,
+    chatId,
+    userId
+  );
+
+  return res
+    .status(200)
+    .send({ ok: true, message: "succeed", data: messagesWithResponse });
 };
 
 module.exports = {
