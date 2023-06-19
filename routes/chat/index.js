@@ -7,5 +7,7 @@ router.get("/", authenticate, chatController.getChats);
 router.post("/", authenticate, chatController.postChat);
 router.get("/:chatId", authenticate, chatController.getMessages);
 router.post("/:chatId", authenticate, chatController.postMessage);
+router.post("/:chatId/stream", authenticate, chatController.postMessageStream);
+router.post("/:chatId/submit", authenticate, chatController.submitResponse);
 
 module.exports = router;
