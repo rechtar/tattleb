@@ -5,6 +5,7 @@ const { authenticate } = require("../../middlewares/authentication");
 
 router.get("/", authenticate, chatController.getChats);
 router.post("/", authenticate, chatController.postChat);
+router.delete("/:chatId", authenticate, chatController.deleteChat);
 router.get("/:chatId", authenticate, chatController.getMessages);
 router.post("/:chatId", authenticate, chatController.postMessage);
 router.post("/:chatId/stream", authenticate, chatController.postMessageStream);

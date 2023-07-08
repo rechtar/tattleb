@@ -15,7 +15,21 @@ const postChat = async (req, res) => {
   const userId = req.decodedUser.userId || null;
   const content = req.body.content;
   const result = await ChatService.createChat(content, userId);
-  console.log(result);
+  // console.log(result);
+
+  return res.status(200).send({ ok: true, message: "succeed", data: result });
+};
+
+const deleteChat = async (req, res) => {
+  const userId = req.decodedUser.userId || null;
+  const chatId = req.params.chatId || null;
+  const result = await ChatService.deleteChat(chatId, userId);
+  if (!userId || !chatId) {
+    return res.status(400).send({
+      ok: false,
+      message: "chatId and userId must be present",
+    });
+  }
 
   return res.status(200).send({ ok: true, message: "succeed", data: result });
 };
@@ -142,6 +156,7 @@ const postMessageStream = async (req, res) => {
 module.exports = {
   getChats,
   postChat,
+  deleteChat,
   getMessages,
   postMessage,
   postMessageStream,
